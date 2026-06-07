@@ -1,93 +1,33 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>SafeVault</title>
-</head>
+<html>
 <body>
-    <h3>SafeVault</h3>
-    <input type="password" id="pass" placeholder="Пароль от заметок"><br><br>
-    <textarea id="content" style="width:100%; height:300px;" placeholder="Тут будут твои данные..."></textarea><br>
-    <button onclick="save()">Сохранить</button>
-    <button onclick="load()">Загрузить</button>
+    <input type="password" id="pass" placeholder="Пароль">
+    <button onclick="test()">ПРОВЕРИТЬ СВЯЗЬ</button>
+    <div id="log" style="white-space: pre-wrap; font-family: monospace; margin-top: 10px;"></div>
 
     <script>
-        // Вставь свою строку Base64 в кавычки вместо текста ниже
-        const ENCRYPTED_TOKEN = "Z3BoX0VrWDB6alJxbG43Y1dGN1dwaFI4N1ptYmM4cHRXazNpc1hTUA=="; 
+        const ENCRYPTED_TOKEN = "ТВОЯ_BASE64_СТРОКА"; 
         const REPO = 'nettis0/safebeta1'; 
         const FILE = 'db.json';
 
-        async function getCryptoKey(pass) {
-            const enc = new TextEncoder();
-            const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(pass), "PBKDF2", false, ["deriveKey"]);
-            return crypto.subtle.deriveKey(
-                {name: "PBKDF2", salt: enc.encode("salt"), iterations: 100000, hash: "SHA-256"}, 
-                keyMaterial, 
-                {name: "AES-GCM", length: 256}, 
-                false, 
-                ["encrypt", "decrypt"]
-            );
-        }
+        function log(msg) { document.getElementById('log').innerText += msg + "\n"; }
 
-        async function save() {
+        async function test() {
+            log("Начинаю тест...");
             try {
                 const TOKEN = atob(ENCRYPTED_TOKEN);
-                const pass = document.getElementById('pass').value;
-                const text = document.getElementById('content').value;
-                const key = await getCryptoKey(pass);
-                const iv = crypto.getRandomValues(new Uint8Array(12));
-                const enc = await crypto.subtle.encrypt({name: "AES-GCM", iv}, key, new TextEncoder().encode(text));
-                const content = btoa(String.fromCharCode(...iv, ...new Uint8Array(enc)));
+                log("Токен расшифрован.");
                 
-                const response = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
-                    method: 'PUT',
-                    headers: { 
-                        'Authorization': `token ${TOKEN}`, 
-                        'Content-Type': 'application/json' 
-                    },
-                    body: JSON.stringify({ 
-                        message: "update", 
-                        content: content,
-                        sha: await getSha() // Нужно для обновления существующего файла
-                    })
+                const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, { 
+                    headers: { 'Authorization': 'token ' + TOKEN } 
                 });
-                alert(response.ok ? "Сохранено!" : "Ошибка: " + response.status);
-            } catch(e) { alert("Ошибка сохранения: " + e.message); }
-        }
-
-        async function load() {
-            try {
-                const TOKEN = atob(ENCRYPTED_TOKEN);
-                const pass = document.getElementById('pass').value;
                 
-                const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}?t=${new Date().getTime()}`, { 
-                    headers: { 'Authorization': `token ${TOKEN}`, 'Cache-Control': 'no-cache' } 
-                });
-
-                if (!res.ok) {
-                    alert("Файл не найден (ошибка " + res.status + ")");
-                    return;
-                }
-                
+                log("Ответ сервера: " + res.status);
                 const data = await res.json();
-                const raw = Uint8Array.from(atob(data.content), c => c.charCodeAt(0));
-                const key = await getCryptoKey(pass);
-                const decrypted = await crypto.subtle.decrypt({name: "AES-GCM", iv: raw.slice(0, 12)}, key, raw.slice(12));
-                document.getElementById('content').value = new TextDecoder().decode(decrypted);
-            } catch(e) { alert("Ошибка загрузки или неверный пароль"); }
-        }
-
-        // Помощник для получения SHA текущего файла (обязательно для API GitHub)
-        async function getSha() {
-            const TOKEN = atob(ENCRYPTED_TOKEN);
-            const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, { 
-                headers: { 'Authorization': `token ${TOKEN}` } 
-            });
-            if (res.ok) {
-                const data = await res.json();
-                return data.sha;
+                log("Данные получены: " + JSON.stringify(data).substring(0, 100) + "...");
+            } catch(e) {
+                log("КРИТИЧЕСКАЯ ОШИБКА: " + e.message);
             }
-            return null;
         }
     </script>
 </body>
