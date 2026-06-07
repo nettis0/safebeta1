@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>1_index22 - Личный виртуальный сейф Фарида (Material 3)</title>
+<style>
+/* Спецификация Material Design 3 Токенов */
+:root {
+  --accent-color: #6750A4;
+  
+  /* Светлая тема M3 */
+  --md-primary: #6750A4;
+  --md-on-primary: #ffffff;
+  --md-primary-container: #EADDFF;
+  --md-on-primary-container: #21005D;
+  --md-surface: #FEF7FF;
+  --md-on-surface: #1D1B20;
+  --md-surface-variant: #E7E0EC;
+  --md-on-surface-variant: #49454F;
+  --md-outline: #79747E;
+  --md-outline-variant: #CAC4D0;
+  --md-surface-container: #F3EDF7;
+  --md-surface-container-high: #ECE6F0;
+  --md-error: #B3261E;
+}
+
+[data-theme="dark"] {
+  /* Тёмная тема M3 */
+  --md-primary: #D0BCFF;
+  --md-on-primary: #381E72;
+  --md-primary-container: #4F378B;
+  --md-on-primary-container: #EADDFF;
+  --md-surface: #141218;
+  --md-on-surface: #E6E1E5;
+  --md-surface-variant: #49454F;
+  --md-on-surface-variant: #CAC4D0;
+  --md-outline: #938F99;
+  --md-outline-variant: #49454F;
+  --md-surface-container: #211F26;
+  --md-surface-container-high: #2B2930;
+  --md-error: #F2B8B5;
+}
+
+body {
+  margin: 0;
+  background: var(--md-surface);
+  color: var(--md-on-surface);
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Верхняя панель (M3 Top App Bar) */
+.top {
+  height: 64px;
+  background: var(--md-surface-container-high);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--md-outline-variant);
+  transition: background 0.3s;
+}
+.top a {
+  color: var(--md-primary) !important;
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 16px;
+  transition: color 0.3s;
+}
+.top a:hover { text-decoration: underline; }
+.left { width: 220px; display: flex; align-items: center; }
+
+/* Контейнер для часов с динамическим фоном */
+#clockContainer {
+  padding: 6px 16px;
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 18px;
+  display: inline-block;
+  transition: background 0.3s, color 0.3s;
+}
+
+.center { flex: 1; text-align: center; font-size: 22px; font-weight: 400; color: var(--md-on-surface); }
+.right { width: 240px; text-align: right; }
+
+/* Основной контейнер */
+.wrap { display: flex; height: calc(100vh - 64px); }
+
+/* Боковое меню */
+.side {
+  width: 360px;
+  background: var(--md-surface-container);
+  padding: 24px 16px;
+  overflow: auto;
+  border-right: 1px solid var(--md-outline-variant);
+  box-sizing: border-box;
+  transition: background 0.3s;
+}
+.side h3 {
+  margin-top: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--md-on-surface-variant);
+  letter-spacing: 0.1px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Главная рабочая зона */
+.main { flex: 1; padding: 24px; position: relative; overflow: auto; }
+#title { font-size: 28px; font-weight: 400; margin-top: 0; margin-bottom: 24px; }
+
+/* Узлы дерева каталогов */
+.node {
+  padding: 0 16px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  color: var(--md-on-surface-variant);
+  border-radius: 28px;
+  margin-bottom: 4px;
+  transition: 0.2s;
+  font-weight: 500;
+  font-size: 14px;
+}
+.node:hover { background: var(--md-surface-variant); color: var(--md-on-surface); }
+.selected { 
+  background: var(--md-primary-container) !important; 
+  color: var(--md-on-primary-container) !important; 
+}
+.node button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  font-size: 16px;
+  color: var(--md-primary);
+  transition: color 0.3s, background 0.2s;
+}
+.node button.btn-delete {
+  color: var(--md-error);
+}
+.node button:hover { background: rgba(0,0,0,0.08); }
+.selected button { color: var(--md-on-primary-container) !important; }
+
+/* Карточки контента */
+.item {
+  display: inline-flex;
+  width: 156px;
+  height: 156px;
+  background: var(--md-surface-container-high);
+  border: 1px solid var(--md-outline-variant);
+  border-radius: 16px;
+  margin: 8px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  vertical-align: top;
+  color: var(--md-on-surface);
+  box-shadow: 0px 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s, transform 0.2s, background 0.3s;
+}
+.item:hover {
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+.item img { max-width: 100%; max-height: 100%; object-fit: cover; }
+
+/* M3 Floating Action Button (FAB) + Динамический фон */
+.fab {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  font-size: 28px;
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s, color 0.3s, box-shadow 0.2s;
+}
+.fab:hover { box-shadow: 0px 6px 12px rgba(0,0,0,0.25); }
+
+/* Выпадающее меню FAB */
+.menu {
+  display: none;
+  position: absolute;
+  right: 24px;
+  bottom: 92px;
+  background: var(--md-surface-container-high);
+  color: var(--md-on-surface);
+  border: 1px solid var(--md-outline-variant);
+  padding: 8px;
+  border-radius: 12px;
+  z-index: 10;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+  transition: background 0.3s;
+}
+.menu div { padding: 12px 16px; cursor: pointer; border-radius: 8px; font-size: 14px; }
+.menu div:hover { background: var(--md-surface-variant); }
+
+/* Поля ввода и Текстовые зоны */
+textarea, .searchBox {
+  width: 100%;
+  background: var(--md-surface);
+  color: var(--md-on-surface);
+  border: 1px solid var(--md-outline);
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-sizing: border-box;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s, background 0.3s, color 0.3s;
+}
+textarea:focus, .searchBox:focus {
+  border-color: var(--md-primary);
+  border-width: 2px;
+  padding: 11px 15px;
+}
+textarea { height: 350px; resize: none; }
+
+/* Кнопки */
+.btn, .side h3 button {
+  padding: 10px 24px;
+  cursor: pointer;
+  border: none;
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.1px;
+  transition: background 0.3s, color 0.3s, box-shadow 0.2s;
+}
+.btn:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+/* Кнопка плюса рядом с поиском: теперь с SVG для гарантированного белого цвета */
+.add-root-btn {
+  background: var(--md-primary) !important;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.add-root-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: #ffffff;
+}
+
+.search-highlight { background: var(--md-primary-container) !important; color: var(--md-on-primary-container) !important; }
+.item-delete {
+  position: absolute !important; right: 8px !important; bottom: 8px !important; opacity: 0; transition: .2s;
+  cursor: pointer; background: var(--md-error); color: white; border: none; border-radius: 8px; padding: 6px;
+}
+.item:hover .item-delete { opacity: 1; }
+
+/* Модальные окна */
+#customDeleteModal, #noteModal, #settingsOverlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 99999;
+}
+#customDeleteModal .box, #noteBox, #settingsWindow {
+  width: 560px; max-width: 90%; margin: 10vh auto;
+  background: var(--md-surface-container-high);
+  color: var(--md-on-surface);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0px 10px 30px rgba(0,0,0,0.15);
+  box-sizing: border-box;
+  transition: background 0.3s;
+}
+#noteBox { width: 800px; height: 80vh; display: flex; flex-direction: column; }
+#noteHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+
+/* Автономный экран логина */
+#loginScreen { position: fixed; inset: 0; background: #FEF7FF; display: flex; align-items: center; justify-content: center; z-index: 100000; }
+#loginBox { background: #F3EDF7; padding: 40px 32px; border-radius: 28px; width: 360px; text-align: center; color: #1D1B20; box-shadow: 0px 4px 12px rgba(0,0,0,0.05); }
+#loginBox h2 { font-weight: 400; font-size: 24px; margin-bottom: 24px; margin-top:0; }
+#loginInput { width: 100%; height: 56px; border-radius: 8px; margin-top: 10px; padding: 0 16px; background: #FFF; color: #1D1B20; border: 1px solid #79747E; box-sizing: border-box; font-size: 16px; }
+#loginInput:focus { border-color: #6750A4; border-width: 2px; }
+#loginBtn { width: 100%; height: 40px; border-radius: 20px; border: none; margin-top: 24px; background: #6750A4; color: white; font-weight: 500; cursor: pointer; box-sizing: border-box; font-size: 14px; }
+
+.viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.9); align-items: center; justify-content: center; z-index: 100005; }
+.viewer img { max-width: 95%; max-height: 95%; border-radius: 12px; }
+
+.color-picker-btn { border: none; border-radius: 12px; padding: 12px 16px; cursor: pointer; color: white; font-weight: bold; }
+
+/* Кнопка настроек шестерёнки + Динамический фон */
+#settingsBtn { 
+  position: absolute; 
+  left: 24px; 
+  bottom: 24px; 
+  width: 56px; 
+  height: 56px; 
+  border-radius: 16px; 
+  background: var(--md-primary-container); 
+  color: var(--md-on-primary-container); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  cursor: pointer; 
+  font-size: 24px; 
+  z-index: 998; 
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.15); 
+  transition: background 0.3s, color 0.3s, box-shadow 0.2s;
+}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+ <div id="loginBox">
+  <h2>Личный сейф</h2>
+  <input id="loginInput" type="password" placeholder="Введите пароль">
+  <button id="loginBtn" onclick="handleLogin()">Войти</button>
+  <div id="loginError" style="color:#B3261E;margin-top:12px;font-size:14px"></div>
+ </div>
+</div>
+
+<div class="top">
+<div class="left">
+  <div id="clockContainer">
+    <span id="clock"></span>
+  </div>
+</div>
+<div class="center">Виртуальный сейф</div>
+<div class="right">
+<a href="https://gemini.google.com" target="_blank">Gemini</a>
+<a href="https://chatgpt.com" target="_blank">ChatGPT</a>
+</div>
+</div>
+
+<div class="wrap">
+<div class="side">
+<h3>
+  <span>Каталоги</span>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <input id='catalogSearch' class='searchBox' placeholder='🔍 Поиск...' oninput='searchCatalogs()' style="margin-bottom:0; height:40px;"> 
+    <button onclick="newRoot()" class="btn add-root-btn" title="Добавить каталог">
+      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    </button>
+  </div>
+</h3>
+<div id="tree" class="tree"></div>
+</div>
+
+<div class="main">
+<h2 id="title">Выберите каталог</h2>
+<div id="content">Пусто</div>
+
+<button class="fab" onclick="toggleMenu()">+</button>
+<div id="menu" class="menu">
+<div onclick="createNote()">Создать заметку</div>
+<div onclick="uploadFile()">Добавить файл</div>
+</div>
+<input type="file" id="fileInput" hidden>
+</div>
+</div>
+
+<div id="viewer" class="viewer" onclick="this.style.display='none'">
+<img id="viewerImg" alt="Просмотр">
+</div>
+
+<div id="customDeleteModal">
+ <div class="box">
+  <h3 id="delTitle" style="margin-top:0;font-size:24px;font-weight:400">Удаление</h3>
+  <p id="delText" style="color:var(--md-on-surface-variant);margin:16px 0 24px">Подтверждение удаления</p>
+  <div style="display:flex;justify-content:flex-end;gap:12px">
+   <button onclick="closeDeleteModal()" class="btn" style="background:transparent;color:var(--md-primary)">Отмена</button>
+   <button id="deleteConfirmBtn" class="btn" style="background:var(--md-error);color:white">Удалить</button>
+  </div>
+ </div>
+</div>
+
+<div id="noteModal">
+ <div id="noteBox">
+  <div id="noteHeader">
+   <button onclick="closeNoteModal()" class="btn" style="background:transparent;color:var(--md-primary)">✕ Закрыть</button>
+   <div>
+    <span id="noteTitleView" onclick="enableTitleEdit()" style="cursor:text;font-size:20px;"></span>
+    <input id="noteTitleEdit" class="searchBox" style="display:none;width:200px;" onblur="saveCurrentNote()">
+   </div>
+   <button onclick="saveCurrentNote()" class="btn">Сохранить</button>
+  </div>
+  <textarea id="noteContent" placeholder="Текст заметки..."></textarea>
+ </div>
+</div>
+
+<div id="settingsBtn" onclick="openSettings()">⚙</div>
+
+<div id="settingsOverlay">
+  <div id="settingsWindow">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 style="margin:0;font-weight:400">Настройки</h2>
+      <button onclick="closeSettings()" class="btn" style="background:transparent;color:var(--md-primary);padding:8px">✕</button>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--md-outline-variant);margin:16px 0">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
+      <span>Тема интерфейса</span>
+      <span id="themeCurrent" onclick="toggleThemeMenu()" style="cursor:pointer;padding:8px 16px;border-radius:10px;background:var(--md-primary-container);color:var(--md-on-primary-container);font-weight:500">Светлая ▼</span>
+    </div>
+    <div id="themeMenu" style="display:none;text-align:right;margin-top:8px">
+      <div id="lightOpt" onclick="setTheme('light')" style="cursor:pointer;padding:8px 16px;border-radius:8px;display:inline-block">Светлая</div>
+      <div id="darkOpt" onclick="setTheme('dark')" style="cursor:pointer;padding:8px 16px;border-radius:8px;display:inline-block">Тёмная</div>
+    </div>
+    <div style="margin-top:24px">
+      <div style="margin-bottom:12px;color:var(--md-on-surface-variant);font-size:14px">Цветовая схема (Material You)</div>
+      <div id="colorPicker" style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="color-picker-btn" style="background:#6750A4" onclick="setAccent('#6750A4')">Фиолетовый</button>
+        <button class="color-picker-btn" style="background:#1a73e8" onclick="setAccent('#1a73e8')">Синий</button>
+        <button class="color-picker-btn" style="background:#b3261e" onclick="setAccent('#b3261e')">Красный</button>
+        <button class="color-picker-btn" style="background:#188038" onclick="setAccent('#188038')">Зелёный</button>
+        <button class="color-picker-btn" style="background:#d63384" onclick="setAccent('#d63384')">Розовый</button>
+        <button class="color-picker-btn" style="background:#f9ab00" onclick="setAccent('#f9ab00')">Жёлтый</button>
+        <button class="color-picker-btn" style="background:#80868b" onclick="setAccent('#80868b')">Серый</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let data=JSON.parse(localStorage.getItem('safe8')||'[]');
+let current=null;
+let currentNoteIndex=null;
+
+function handleLogin(){
+ if(document.getElementById('loginInput').value==='95632010'){
+   document.getElementById('loginScreen').style.display='none';
+ }else{
+   document.getElementById('loginError').textContent='Неверный пароль';
+ }
+}
+
+document.getElementById('loginInput').addEventListener('keydown', e=>{
+ if(e.key==='Enter') handleLogin();
+});
+
+function saveData(){
+ localStorage.setItem('safe8',JSON.stringify(data));
+ renderTree();
+}
+
+function tick(){
+ const clockEl = document.getElementById('clock');
+ if(clockEl) {
+   const now = new Date();
+   clockEl.textContent = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+ }
+}
+setInterval(tick,1000);tick();
+
+function newRoot(){
+ let n=prompt('Название каталога');
+ if(!n)return;
+ data.push({name:n,children:[],notes:[],files:[]});
+ saveData();
+}
+
+function getNode(path){
+ let n=data[path[0]];
+ for(let i=1;i<path.length;i++) n=n.children[path[i]];
+ return n;
+}
+
+function addSub(path){
+ let n=prompt('Название подкаталога');
+ if(!n)return;
+ getNode(path).children.push({name:n,children:[],notes:[],files:[]});
+ saveData();
+}
+
+function deleteFolder(path){
+ openDeleteModal('Удаление каталога','Будут удалены каталог и всё его содержимое.', function(){
+ if(path.length===1){ data.splice(path[0],1); }
+ else{
+   let parent=getNode(path.slice(0,-1));
+   parent.children.splice(path[path.length-1],1);
+ }
+ saveData();
+ document.getElementById('content').innerHTML='Пусто';
+ document.getElementById('title').innerText='Выберите каталог';
+ current=null;
+ });
+}
+
+function openFolder(path){
+ current=path;
+ document.querySelectorAll('.node').forEach(x=>x.classList.remove('selected'));
+ const el=document.getElementById('node_'+path.join('_'));
+ if(el) el.classList.add('selected');
+
+ let n=getNode(path);
+ document.getElementById('title').innerText=n.name;
+
+ let html='';
+ (n.notes || []).forEach((x,i)=>{
+  html+=`<div class="item" onclick="openNote(${i})">
+   <div style="text-align:center;padding:16px;word-break:break-all;font-size:14px">${x.title}</div>
+   <button class="item-delete" onclick="event.stopPropagation();deleteNote(${i})">🗑️</button>
+  </div>`;
+ });
+
+ (n.files || []).forEach((x,i)=>{
+  html+=`<div class="item">
+   <img src="${x}" onclick="openImage('${x}')" alt="Файл">
+   <button class="item-delete" onclick="event.stopPropagation();deleteFile(${i})">🗑️</button>
+  </div>`;
+ });
+
+ document.getElementById('content').innerHTML=html||'Пусто';
+}
+
+function deleteNote(i){
+ let name=getNode(current).notes[i].title;
+ openDeleteModal('Удаление заметки', 'Вы действительно хотите удалить "'+name+'"?', function(){
+   getNode(current).notes.splice(i,1);
+   saveData();
+   openFolder(current);
+ });
+}
+
+function deleteFile(i){
+ openDeleteModal('Удаление файла', 'Вы действительно хотите удалить этот файл?', function(){
+   getNode(current).files.splice(i,1);
+   saveData();
+   openFolder(current);
+ });
+}
+
+function openImage(src){
+ const viewer = document.getElementById('viewer');
+ document.getElementById('viewerImg').src=src;
+ viewer.style.display='flex';
+}
+
+function openNote(i){
+ currentNoteIndex=i;
+ let note=getNode(current).notes[i];
+ document.getElementById('noteTitleView').style.display='inline';
+ document.getElementById('noteTitleEdit').style.display='none';
+ document.getElementById('noteTitleView').textContent=note.title;
+ document.getElementById('noteContent').value=note.text||'';
+ document.getElementById('noteModal').style.display='block';
+}
+
+function closeNoteModal(){
+ document.getElementById('noteModal').style.display='none';
+}
+
+function enableTitleEdit(){
+ const v=document.getElementById('noteTitleView');
+ const e=document.getElementById('noteTitleEdit');
+ e.value=v.textContent;
+ v.style.display='none';
+ e.style.display='inline-block';
+ e.focus();
+}
+
+function saveCurrentNote(){
+ if(currentNoteIndex===null) return;
+ let note=getNode(current).notes[currentNoteIndex];
+ const edit=document.getElementById('noteTitleEdit');
+ const view=document.getElementById('noteTitleView');
+ 
+ if(edit.style.display!=='none' && edit.value.trim()){
+   note.title=edit.value.trim();
+   view.textContent=note.title;
+   edit.style.display='none';
+   view.style.display='inline';
+ }
+ note.text=document.getElementById('noteContent').value;
+ saveData();
+ openFolder(current);
+}
+
+function createNote(){
+ if(!current)return alert('Выберите каталог');
+ let name=prompt('Название заметки');
+ if(!name)return;
+ if(!getNode(current).notes) getNode(current).notes = [];
+ getNode(current).notes.push({title:name,text:''});
+ saveData();
+ openFolder(current);
+}
+
+function uploadFile(){ 
+ if(!current) return alert('Выберите каталог');
+ document.getElementById('fileInput').click(); 
+}
+
+document.getElementById('fileInput').onchange=e=>{
+ let f=e.target.files[0];
+ if(!f)return;
+ let r=new FileReader();
+ r.onload=()=>{
+   if(!getNode(current).files) getNode(current).files = [];
+   getNode(current).files.push(r.result);
+   saveData();
+   openFolder(current);
+ };
+ r.readAsDataURL(f);
+};
+
+function toggleMenu(){
+ const menu = document.getElementById('menu');
+ menu.style.display=menu.style.display==='block'?'none':'block';
+}
+
+function draw(nodes,path=[],prefix=''){
+ let h='';
+ nodes.forEach((n,i)=>{
+   let p=[...path,i];
+   h+=`<div class="node" id="node_${p.join('_')}" onclick='openFolder(${JSON.stringify(p)})'>
+   <span>${prefix}├─ ${n.name}</span>
+   <span>
+     <button onclick='event.stopPropagation();addSub(${JSON.stringify(p)})'>➕</button>
+     <button class="btn-delete" onclick='event.stopPropagation();deleteFolder(${JSON.stringify(p)})'>🗑️</button>
+   </span>
+   </div>`;
+   if(n.children && n.children.length > 0){
+     h+=draw(n.children,p,prefix+'│&nbsp;&nbsp;');
+   }
+ });
+ return h;
+}
+
+function renderTree(){ 
+ document.getElementById('tree').innerHTML=draw(data); 
+ if(current) {
+   const el=document.getElementById('node_'+current.join('_'));
+   if(el) el.classList.add('selected');
+ }
+}
+
+function openSettings(){document.getElementById('settingsOverlay').style.display='block';}
+function closeSettings(){document.getElementById('settingsOverlay').style.display='none';}
+function toggleThemeMenu(){
+ const m=document.getElementById('themeMenu');
+ m.style.display=m.style.display==='block'?'none':'block';
+}
+
+function setTheme(t){
+ localStorage.setItem('safe_theme',t);
+ applyTheme();
+}
+
+function applyTheme() {
+ const t = localStorage.getItem('safe_theme') || 'light';
+ document.documentElement.setAttribute('data-theme', t);
+ 
+ const currentLabel = document.getElementById('themeCurrent');
+ 
+ // Генерация динамических переменных контейнеров на основе основного цвета
+ const accent = localStorage.getItem('accentColor') || '#6750A4';
+ if (t === 'light') {
+   currentLabel.textContent = 'Светлая ▼';
+   document.getElementById('lightOpt').style.background = 'var(--md-primary-container)';
+   document.getElementById('lightOpt').style.color = 'var(--md-on-primary-container)';
+   document.getElementById('darkOpt').style.background = 'transparent';
+   document.getElementById('darkOpt').style.color = 'inherit';
+   
+   document.documentElement.style.setProperty('--md-primary', accent);
+   document.documentElement.style.setProperty('--md-primary-container', accent + '26'); // 15% прозрачности для светлого контейнера
+   document.documentElement.style.setProperty('--md-on-primary-container', accent);
+ } else {
+   currentLabel.textContent = 'Тёмная ▼';
+   document.getElementById('darkOpt').style.background = 'var(--md-primary-container)';
+   document.getElementById('darkOpt').style.color = 'var(--md-on-primary-container)';
+   document.getElementById('lightOpt').style.background = 'transparent';
+   document.getElementById('lightOpt').style.color = 'inherit';
+   
+   document.documentElement.style.setProperty('--md-primary', accent);
+   document.documentElement.style.setProperty('--md-primary-container', accent + '4D'); // 30% прозрачности для тёмного контейнера
+   document.documentElement.style.setProperty('--md-on-primary-container', '#ffffff');
+ }
+}
+
+function setAccent(color){
+ localStorage.setItem('accentColor',color);
+ applyTheme();
+}
+
+function searchCatalogs(){
+ const q=(document.getElementById('catalogSearch')?.value||'').toLowerCase();
+ document.querySelectorAll('.node').forEach(n=>{
+   n.classList.remove('search-highlight');
+   if(q && n.textContent.toLowerCase().includes(q)){
+      n.classList.add('search-highlight');
+      n.scrollIntoView({block:'center',behavior:'smooth'});
+   }
+ });
+}
+
+function openDeleteModal(title,text,callback){
+ document.getElementById('delTitle').textContent=title;
+ document.getElementById('delText').textContent=text;
+ document.getElementById('customDeleteModal').style.display='block';
+ document.getElementById('deleteConfirmBtn').onclick=function(){
+   document.getElementById('customDeleteModal').style.display='none';
+   if(callback) callback();
+ };
+}
+function closeDeleteModal(){
+ document.getElementById('customDeleteModal').style.display='none';
+}
+
+// Старт
+(function(){
+ applyTheme();
+ renderTree();
+})();
+</script>
+</body>
+</html>
