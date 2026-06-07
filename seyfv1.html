@@ -3,13 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>1_index22 - Личный виртуальный сейф Фарида (Material 3)</title>
+<title>Личный виртуальный сейф</title>
 <style>
-/* Спецификация Material Design 3 Токенов */
 :root {
   --accent-color: #6750A4;
-  
-  /* Светлая тема M3 */
   --md-primary: #6750A4;
   --md-on-primary: #ffffff;
   --md-primary-container: #EADDFF;
@@ -26,7 +23,6 @@
 }
 
 [data-theme="dark"] {
-  /* Тёмная тема M3 */
   --md-primary: #D0BCFF;
   --md-on-primary: #381E72;
   --md-primary-container: #4F378B;
@@ -48,81 +44,79 @@ body {
   color: var(--md-on-surface);
   font-family: 'Roboto', 'Segoe UI', sans-serif;
   transition: background 0.3s, color 0.3s;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-/* Верхняя панель (M3 Top App Bar) */
 .top {
-  height: 64px;
+  height: auto;
+  min-height: 64px;
   background: var(--md-surface-container-high);
   display: flex;
   align-items: center;
-  padding: 0 24px;
+  justify-content: space-between;
+  padding: 8px 16px;
   border-bottom: 1px solid var(--md-outline-variant);
-  transition: background 0.3s;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .top a {
   color: var(--md-primary) !important;
   text-decoration: none;
   font-weight: 500;
-  margin-left: 16px;
-  transition: color 0.3s;
+  margin-left: 12px;
+  font-size: 14px;
 }
 .top a:hover { text-decoration: underline; }
-.left { width: 220px; display: flex; align-items: center; }
 
-/* Контейнер для часов с динамическим фоном */
 #clockContainer {
-  padding: 6px 16px;
+  padding: 6px 12px;
   background: var(--md-primary-container);
   color: var(--md-on-primary-container);
   border-radius: 12px;
   font-weight: 500;
-  font-size: 18px;
-  display: inline-block;
-  transition: background 0.3s, color 0.3s;
+  font-size: 16px;
 }
 
-.center { flex: 1; text-align: center; font-size: 22px; font-weight: 400; color: var(--md-on-surface); }
-.right { width: 240px; text-align: right; }
+.center { font-size: 20px; font-weight: 400; text-align: center; flex: 1; min-width: 150px; }
+.right { display: flex; justify-content: flex-end; align-items: center; }
 
-/* Основной контейнер */
-.wrap { display: flex; height: calc(100vh - 64px); }
+.wrap { display: flex; flex: 1; height: calc(100vh - 64px); }
 
-/* Боковое меню */
 .side {
-  width: 360px;
+  width: 320px;
   background: var(--md-surface-container);
-  padding: 24px 16px;
+  padding: 16px;
   overflow: auto;
   border-right: 1px solid var(--md-outline-variant);
   box-sizing: border-box;
-  transition: background 0.3s;
+  display: flex;
+  flex-direction: column;
 }
 .side h3 {
   margin-top: 0;
   font-size: 14px;
   font-weight: 500;
   color: var(--md-on-surface-variant);
-  letter-spacing: 0.1px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
-/* Главная рабочая зона */
-.main { flex: 1; padding: 24px; position: relative; overflow: auto; }
-#title { font-size: 28px; font-weight: 400; margin-top: 0; margin-bottom: 24px; }
+.main { flex: 1; padding: 24px; position: relative; overflow: auto; box-sizing: border-box; }
+#title { font-size: 24px; font-weight: 400; margin-top: 0; margin-bottom: 24px; word-break: break-word; }
 
-/* Узлы дерева каталогов */
 .node {
-  padding: 0 16px;
-  height: 56px;
+  padding: 0 12px;
+  min-height: 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   color: var(--md-on-surface-variant);
-  border-radius: 28px;
+  border-radius: 24px;
   margin-bottom: 4px;
   transition: 0.2s;
   font-weight: 500;
@@ -137,27 +131,21 @@ body {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: 4px;
   border-radius: 50%;
-  font-size: 16px;
+  font-size: 14px;
   color: var(--md-primary);
-  transition: color 0.3s, background 0.2s;
 }
-.node button.btn-delete {
-  color: var(--md-error);
-}
-.node button:hover { background: rgba(0,0,0,0.08); }
-.selected button { color: var(--md-on-primary-container) !important; }
+.node button.btn-delete { color: var(--md-error); }
 
-/* Карточки контента */
 .item {
   display: inline-flex;
-  width: 156px;
-  height: 156px;
+  width: 140px;
+  height: 140px;
   background: var(--md-surface-container-high);
   border: 1px solid var(--md-outline-variant);
   border-radius: 16px;
-  margin: 8px;
+  margin: 6px;
   align-items: center;
   justify-content: center;
   overflow: hidden;
@@ -166,19 +154,13 @@ body {
   vertical-align: top;
   color: var(--md-on-surface);
   box-shadow: 0px 1px 3px rgba(0,0,0,0.05);
-  transition: box-shadow 0.2s, transform 0.2s, background 0.3s;
-}
-.item:hover {
-  box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
-  transform: translateY(-2px);
 }
 .item img { max-width: 100%; max-height: 100%; object-fit: cover; }
 
-/* M3 Floating Action Button (FAB) + Динамический фон */
 .fab {
-  position: absolute;
-  right: 24px;
-  bottom: 24px;
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
   width: 56px;
   height: 56px;
   border-radius: 16px;
@@ -191,51 +173,41 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.3s, color 0.3s, box-shadow 0.2s;
+  z-index: 999;
 }
-.fab:hover { box-shadow: 0px 6px 12px rgba(0,0,0,0.25); }
 
-/* Выпадающее меню FAB */
 .menu {
   display: none;
-  position: absolute;
-  right: 24px;
-  bottom: 92px;
+  position: fixed;
+  right: 16px;
+  bottom: 80px;
   background: var(--md-surface-container-high);
   color: var(--md-on-surface);
   border: 1px solid var(--md-outline-variant);
-  padding: 8px;
+  padding: 4px;
   border-radius: 12px;
-  z-index: 10;
+  z-index: 1000;
   box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
-  transition: background 0.3s;
 }
 .menu div { padding: 12px 16px; cursor: pointer; border-radius: 8px; font-size: 14px; }
 .menu div:hover { background: var(--md-surface-variant); }
 
-/* Поля ввода и Текстовые зоны */
 textarea, .searchBox {
   width: 100%;
   background: var(--md-surface);
   color: var(--md-on-surface);
   border: 1px solid var(--md-outline);
   border-radius: 8px;
-  padding: 12px 16px;
+  padding: 8px 12px;
   box-sizing: border-box;
-  font-size: 16px;
+  font-size: 14px;
   outline: none;
-  transition: border-color 0.2s, background 0.3s, color 0.3s;
 }
-textarea:focus, .searchBox:focus {
-  border-color: var(--md-primary);
-  border-width: 2px;
-  padding: 11px 15px;
-}
-textarea { height: 350px; resize: none; }
+textarea:focus, .searchBox:focus { border-color: var(--md-primary); border-width: 2px; padding: 7px 11px; }
+textarea { height: 300px; resize: none; }
 
-/* Кнопки */
-.btn, .side h3 button {
-  padding: 10px 24px;
+.btn {
+  padding: 8px 16px;
   cursor: pointer;
   border: none;
   background: var(--md-primary);
@@ -243,84 +215,53 @@ textarea { height: 350px; resize: none; }
   border-radius: 20px;
   font-weight: 500;
   font-size: 14px;
-  letter-spacing: 0.1px;
-  transition: background 0.3s, color 0.3s, box-shadow 0.2s;
 }
-.btn:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
 
-/* Кнопка плюса рядом с поиском: теперь с SVG для гарантированного белого цвета */
 .add-root-btn {
   background: var(--md-primary) !important;
-  padding: 0;
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0; width: 40px; height: 40px; min-width: 40px;
+  border-radius: 12px; display: flex; align-items: center; justify-content: center;
 }
-.add-root-btn svg {
-  width: 20px;
-  height: 20px;
-  fill: #ffffff;
-}
+.add-root-btn svg { width: 20px; height: 20px; fill: #ffffff; }
 
-.search-highlight { background: var(--md-primary-container) !important; color: var(--md-on-primary-container) !important; }
 .item-delete {
-  position: absolute !important; right: 8px !important; bottom: 8px !important; opacity: 0; transition: .2s;
-  cursor: pointer; background: var(--md-error); color: white; border: none; border-radius: 8px; padding: 6px;
+  position: absolute; right: 4px; bottom: 4px;
+  cursor: pointer; background: var(--md-error); color: white; border: none; border-radius: 6px; padding: 4px 6px; font-size: 12px;
 }
-.item:hover .item-delete { opacity: 1; }
 
-/* Модальные окна */
-#customDeleteModal, #noteModal, #settingsOverlay {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 99999;
-}
+#customDeleteModal, #noteModal, #settingsOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 99999; }
 #customDeleteModal .box, #noteBox, #settingsWindow {
-  width: 560px; max-width: 90%; margin: 10vh auto;
-  background: var(--md-surface-container-high);
-  color: var(--md-on-surface);
-  border-radius: 28px;
-  padding: 24px;
-  box-shadow: 0px 10px 30px rgba(0,0,0,0.15);
-  box-sizing: border-box;
-  transition: background 0.3s;
+  width: 500px; max-width: 95%; margin: 10vh auto;
+  background: var(--md-surface-container-high); color: var(--md-on-surface);
+  border-radius: 28px; padding: 24px; box-sizing: border-box;
 }
-#noteBox { width: 800px; height: 80vh; display: flex; flex-direction: column; }
-#noteHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+#noteBox { width: 90%; max-width: 700px; height: 80vh; display: flex; flex-direction: column; }
+#noteHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 8px; }
 
-/* Автономный экран логина */
 #loginScreen { position: fixed; inset: 0; background: #FEF7FF; display: flex; align-items: center; justify-content: center; z-index: 100000; }
-#loginBox { background: #F3EDF7; padding: 40px 32px; border-radius: 28px; width: 360px; text-align: center; color: #1D1B20; box-shadow: 0px 4px 12px rgba(0,0,0,0.05); }
-#loginBox h2 { font-weight: 400; font-size: 24px; margin-bottom: 24px; margin-top:0; }
-#loginInput { width: 100%; height: 56px; border-radius: 8px; margin-top: 10px; padding: 0 16px; background: #FFF; color: #1D1B20; border: 1px solid #79747E; box-sizing: border-box; font-size: 16px; }
-#loginInput:focus { border-color: #6750A4; border-width: 2px; }
-#loginBtn { width: 100%; height: 40px; border-radius: 20px; border: none; margin-top: 24px; background: #6750A4; color: white; font-weight: 500; cursor: pointer; box-sizing: border-box; font-size: 14px; }
+#loginBox { background: #F3EDF7; padding: 32px 24px; border-radius: 28px; width: 320px; text-align: center; color: #1D1B20; }
+#loginInput { width: 100%; height: 48px; border-radius: 8px; margin-top: 10px; padding: 0 12px; background: #FFF; border: 1px solid #79747E; box-sizing: border-box; }
+#loginBtn { width: 100%; height: 40px; border-radius: 20px; border: none; margin-top: 24px; background: #6750A4; color: white; font-weight: 500; cursor: pointer; }
 
 .viewer { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.9); align-items: center; justify-content: center; z-index: 100005; }
 .viewer img { max-width: 95%; max-height: 95%; border-radius: 12px; }
+.color-picker-btn { border: none; border-radius: 12px; padding: 8px 12px; cursor: pointer; color: white; font-weight: bold; font-size: 12px; }
 
-.color-picker-btn { border: none; border-radius: 12px; padding: 12px 16px; cursor: pointer; color: white; font-weight: bold; }
-
-/* Кнопка настроек шестерёнки + Динамический фон */
 #settingsBtn { 
-  position: absolute; 
-  left: 24px; 
-  bottom: 24px; 
-  width: 56px; 
-  height: 56px; 
-  border-radius: 16px; 
-  background: var(--md-primary-container); 
-  color: var(--md-on-primary-container); 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  cursor: pointer; 
-  font-size: 24px; 
-  z-index: 998; 
-  box-shadow: 0px 4px 8px rgba(0,0,0,0.15); 
-  transition: background 0.3s, color 0.3s, box-shadow 0.2s;
+  position: fixed; left: 16px; bottom: 16px; width: 56px; height: 56px; border-radius: 16px; 
+  background: var(--md-primary-container); color: var(--md-on-primary-container); 
+  display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; z-index: 998; 
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .wrap { flex-direction: column; height: auto; overflow: visible; }
+  .side { width: 100%; border-right: none; border-bottom: 1px solid var(--md-outline-variant); height: auto; max-height: 300px; }
+  .main { padding: 16px; padding-bottom: 80px; }
+  #settingsBtn { left: 16px; bottom: 16px; }
+  .fab { right: 16px; bottom: 16px; }
+  .menu { right: 16px; bottom: 80px; }
 }
 </style>
 </head>
@@ -336,24 +277,20 @@ textarea { height: 350px; resize: none; }
 </div>
 
 <div class="top">
-<div class="left">
-  <div id="clockContainer">
-    <span id="clock"></span>
+  <div id="clockContainer"><span id="clock"></span></div>
+  <div class="center">Виртуальный сейф</div>
+  <div class="right">
+    <a href="https://gemini.google.com" target="_blank">Gemini</a>
+    <a href="https://chatgpt.com" target="_blank">ChatGPT</a>
   </div>
-</div>
-<div class="center">Виртуальный сейф</div>
-<div class="right">
-<a href="https://gemini.google.com" target="_blank">Gemini</a>
-<a href="https://chatgpt.com" target="_blank">ChatGPT</a>
-</div>
 </div>
 
 <div class="wrap">
 <div class="side">
 <h3>
   <span>Каталоги</span>
-  <div style="display:flex;gap:8px;align-items:center;">
-    <input id='catalogSearch' class='searchBox' placeholder='🔍 Поиск...' oninput='searchCatalogs()' style="margin-bottom:0; height:40px;"> 
+  <div style="display:flex;gap:8px;align-items:center;width:100%;">
+    <input id='catalogSearch' class='searchBox' placeholder='🔍 Поиск...' oninput='searchCatalogs()' style="margin-bottom:0; height:40px; flex:1;"> 
     <button onclick="newRoot()" class="btn add-root-btn" title="Добавить каталог">
       <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
     </button>
@@ -381,7 +318,7 @@ textarea { height: 350px; resize: none; }
 
 <div id="customDeleteModal">
  <div class="box">
-  <h3 id="delTitle" style="margin-top:0;font-size:24px;font-weight:400">Удаление</h3>
+  <h3 id="delTitle" style="margin-top:0;font-size:22px;font-weight:400">Удаление</h3>
   <p id="delText" style="color:var(--md-on-surface-variant);margin:16px 0 24px">Подтверждение удаления</p>
   <div style="display:flex;justify-content:flex-end;gap:12px">
    <button onclick="closeDeleteModal()" class="btn" style="background:transparent;color:var(--md-primary)">Отмена</button>
@@ -393,12 +330,12 @@ textarea { height: 350px; resize: none; }
 <div id="noteModal">
  <div id="noteBox">
   <div id="noteHeader">
-   <button onclick="closeNoteModal()" class="btn" style="background:transparent;color:var(--md-primary)">✕ Закрыть</button>
+   <button onclick="closeNoteModal()" class="btn" style="background:transparent;color:var(--md-primary)">✕</button>
    <div>
-    <span id="noteTitleView" onclick="enableTitleEdit()" style="cursor:text;font-size:20px;"></span>
-    <input id="noteTitleEdit" class="searchBox" style="display:none;width:200px;" onblur="saveCurrentNote()">
+    <span id="noteTitleView" onclick="enableTitleEdit()" style="cursor:text;font-size:18px;font-weight:500;"></span>
+    <input id="noteTitleEdit" class="searchBox" style="display:none;width:150px;" onblur="saveCurrentNote()">
    </div>
-   <button onclick="saveCurrentNote()" class="btn">Сохранить</button>
+   <button onclick="saveCurrentNote()" class="btn">ОК</button>
   </div>
   <textarea id="noteContent" placeholder="Текст заметки..."></textarea>
  </div>
@@ -409,7 +346,7 @@ textarea { height: 350px; resize: none; }
 <div id="settingsOverlay">
   <div id="settingsWindow">
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <h2 style="margin:0;font-weight:400">Настройки</h2>
+      <h2 style="margin:0;font-weight:400;font-size:22px">Настройки</h2>
       <button onclick="closeSettings()" class="btn" style="background:transparent;color:var(--md-primary);padding:8px">✕</button>
     </div>
     <hr style="border:none;border-top:1px solid var(--md-outline-variant);margin:16px 0">
@@ -422,7 +359,7 @@ textarea { height: 350px; resize: none; }
       <div id="darkOpt" onclick="setTheme('dark')" style="cursor:pointer;padding:8px 16px;border-radius:8px;display:inline-block">Тёмная</div>
     </div>
     <div style="margin-top:24px">
-      <div style="margin-bottom:12px;color:var(--md-on-surface-variant);font-size:14px">Цветовая схема (Material You)</div>
+      <div style="margin-bottom:12px;color:var(--md-on-surface-variant);font-size:14px">Цветовая схема</div>
       <div id="colorPicker" style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="color-picker-btn" style="background:#6750A4" onclick="setAccent('#6750A4')">Фиолетовый</button>
         <button class="color-picker-btn" style="background:#1a73e8" onclick="setAccent('#1a73e8')">Синий</button>
@@ -513,7 +450,7 @@ function openFolder(path){
  let html='';
  (n.notes || []).forEach((x,i)=>{
   html+=`<div class="item" onclick="openNote(${i})">
-   <div style="text-align:center;padding:16px;word-break:break-all;font-size:14px">${x.title}</div>
+   <div style="text-align:center;padding:12px;word-break:break-all;font-size:13px">${x.title}</div>
    <button class="item-delete" onclick="event.stopPropagation();deleteNote(${i})">🗑️</button>
   </div>`;
  });
@@ -530,7 +467,7 @@ function openFolder(path){
 
 function deleteNote(i){
  let name=getNode(current).notes[i].title;
- openDeleteModal('Удаление заметки', 'Вы действительно хотите удалить "'+name+'"?', function(){
+ openDeleteModal('Удаление заметки', 'Удалить "'+name+'"?', function(){
    getNode(current).notes.splice(i,1);
    saveData();
    openFolder(current);
@@ -538,7 +475,7 @@ function deleteNote(i){
 }
 
 function deleteFile(i){
- openDeleteModal('Удаление файла', 'Вы действительно хотите удалить этот файл?', function(){
+ openDeleteModal('Удаление файла', 'Удалить этот файл?', function(){
    getNode(current).files.splice(i,1);
    saveData();
    openFolder(current);
@@ -561,17 +498,12 @@ function openNote(i){
  document.getElementById('noteModal').style.display='block';
 }
 
-function closeNoteModal(){
- document.getElementById('noteModal').style.display='none';
-}
+function closeNoteModal(){ document.getElementById('noteModal').style.display='none'; }
 
 function enableTitleEdit(){
  const v=document.getElementById('noteTitleView');
  const e=document.getElementById('noteTitleEdit');
- e.value=v.textContent;
- v.style.display='none';
- e.style.display='inline-block';
- e.focus();
+ e.value=v.textContent; v.style.display='none'; e.style.display='inline-block'; e.focus();
 }
 
 function saveCurrentNote(){
@@ -597,8 +529,7 @@ function createNote(){
  if(!name)return;
  if(!getNode(current).notes) getNode(current).notes = [];
  getNode(current).notes.push({title:name,text:''});
- saveData();
- openFolder(current);
+ saveData(); openFolder(current);
 }
 
 function uploadFile(){ 
@@ -607,14 +538,12 @@ function uploadFile(){
 }
 
 document.getElementById('fileInput').onchange=e=>{
- let f=e.target.files[0];
- if(!f)return;
+ let f=e.target.files[0]; if(!f)return;
  let r=new FileReader();
  r.onload=()=>{
    if(!getNode(current).files) getNode(current).files = [];
    getNode(current).files.push(r.result);
-   saveData();
-   openFolder(current);
+   saveData(); openFolder(current);
  };
  r.readAsDataURL(f);
 };
@@ -635,9 +564,7 @@ function draw(nodes,path=[],prefix=''){
      <button class="btn-delete" onclick='event.stopPropagation();deleteFolder(${JSON.stringify(p)})'>🗑️</button>
    </span>
    </div>`;
-   if(n.children && n.children.length > 0){
-     h+=draw(n.children,p,prefix+'│&nbsp;&nbsp;');
-   }
+   if(n.children && n.children.length > 0){ h+=draw(n.children,p,prefix+'│&nbsp;&nbsp;'); }
  });
  return h;
 }
@@ -657,19 +584,14 @@ function toggleThemeMenu(){
  m.style.display=m.style.display==='block'?'none':'block';
 }
 
-function setTheme(t){
- localStorage.setItem('safe_theme',t);
- applyTheme();
-}
+function setTheme(t){ localStorage.setItem('safe_theme',t); applyTheme(); }
 
 function applyTheme() {
  const t = localStorage.getItem('safe_theme') || 'light';
  document.documentElement.setAttribute('data-theme', t);
- 
  const currentLabel = document.getElementById('themeCurrent');
- 
- // Генерация динамических переменных контейнеров на основе основного цвета
  const accent = localStorage.getItem('accentColor') || '#6750A4';
+ 
  if (t === 'light') {
    currentLabel.textContent = 'Светлая ▼';
    document.getElementById('lightOpt').style.background = 'var(--md-primary-container)';
@@ -678,7 +600,7 @@ function applyTheme() {
    document.getElementById('darkOpt').style.color = 'inherit';
    
    document.documentElement.style.setProperty('--md-primary', accent);
-   document.documentElement.style.setProperty('--md-primary-container', accent + '26'); // 15% прозрачности для светлого контейнера
+   document.documentElement.style.setProperty('--md-primary-container', accent + '26');
    document.documentElement.style.setProperty('--md-on-primary-container', accent);
  } else {
    currentLabel.textContent = 'Тёмная ▼';
@@ -688,15 +610,12 @@ function applyTheme() {
    document.getElementById('lightOpt').style.color = 'inherit';
    
    document.documentElement.style.setProperty('--md-primary', accent);
-   document.documentElement.style.setProperty('--md-primary-container', accent + '4D'); // 30% прозрачности для тёмного контейнера
+   document.documentElement.style.setProperty('--md-primary-container', accent + '4D');
    document.documentElement.style.setProperty('--md-on-primary-container', '#ffffff');
  }
 }
 
-function setAccent(color){
- localStorage.setItem('accentColor',color);
- applyTheme();
-}
+function setAccent(color){ localStorage.setItem('accentColor',color); applyTheme(); }
 
 function searchCatalogs(){
  const q=(document.getElementById('catalogSearch')?.value||'').toLowerCase();
@@ -704,7 +623,6 @@ function searchCatalogs(){
    n.classList.remove('search-highlight');
    if(q && n.textContent.toLowerCase().includes(q)){
       n.classList.add('search-highlight');
-      n.scrollIntoView({block:'center',behavior:'smooth'});
    }
  });
 }
@@ -718,15 +636,9 @@ function openDeleteModal(title,text,callback){
    if(callback) callback();
  };
 }
-function closeDeleteModal(){
- document.getElementById('customDeleteModal').style.display='none';
-}
+function closeDeleteModal(){ document.getElementById('customDeleteModal').style.display='none'; }
 
-// Старт
-(function(){
- applyTheme();
- renderTree();
-})();
+(function(){ applyTheme(); renderTree(); })();
 </script>
 </body>
 </html>
