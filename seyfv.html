@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Личный виртуальный сейф</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
 <style>
 :root {
   --accent-color: #6750A4;
@@ -254,7 +256,8 @@ textarea { height: 300px; resize: none; }
   box-shadow: 0px 4px 8px rgba(0,0,0,0.15);
 }
 
-/* Мобильная адаптация */
+#syncStatus { font-size: 12px; color: var(--md-on-surface-variant); margin-top: 8px; text-align: center; }
+
 @media (max-width: 768px) {
   .wrap { flex-direction: column; height: auto; overflow: visible; }
   .side { width: 100%; border-right: none; border-bottom: 1px solid var(--md-outline-variant); height: auto; max-height: 300px; }
@@ -273,6 +276,7 @@ textarea { height: 300px; resize: none; }
   <input id="loginInput" type="password" placeholder="Введите пароль">
   <button id="loginBtn" onclick="handleLogin()">Войти</button>
   <div id="loginError" style="color:#B3261E;margin-top:12px;font-size:14px"></div>
+  <div id="syncStatus">Инициализация облака...</div>
  </div>
 </div>
 
@@ -370,17 +374,33 @@ textarea { height: 300px; resize: none; }
         <button class="color-picker-btn" style="background:#80868b" onclick="setAccent('#80868b')">Серый</button>
       </div>
     </div>
+    <hr style="border:none;border-top:1px solid var(--md-outline-variant);margin:16px 0">
+    <div style="text-align:center">
+      <button onclick="requestGoogleAuth()" class="btn" style="background:#4285F4;">Переподключить Google Диск</button>
+    </div>
   </div>
 </div>
 
 <script>
-let data=JSON.parse(localStorage.getItem('safe8')||'[]');
-let current=null;
-let currentNoteIndex=null;
+// Вставляем твои сгенерированные ключи напрямую в конфигурацию приложения
+const CLIENT_ID = '330004729750-gpksj9unmlkmlck0km9mf2r8cdn59d0g.apps.googleusercontent.com';
+const API_KEY = 'AIzaSyA3RYlQBPFRGkOBbyl61OAsn1W_19AZPz0';
+const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
+
+let data = JSON.parse(localStorage.getItem('safe8') || '[]');
+let current = null;
+let currentNoteIndex = null;
+let tokenClient;
+let gapiInited = false;
+let gisInited = false;
+let googleDriveFileId = null;
 
 function handleLogin(){
  if(document.getElementById('loginInput').value==='95632010'){
    document.getElementById('loginScreen').style.display='none';
+   if (gapiInited && gisInited) {
+     startCloudSync();
+   }
  }else{
    document.getElementById('loginError').textContent='Неверный пароль';
  }
@@ -390,9 +410,96 @@ document.getElementById('loginInput').addEventListener('keydown', e=>{
  if(e.key==='Enter') handleLogin();
 });
 
+function updateSyncStatus(text) {
+  const statusEl = document.getElementById('syncStatus');
+  if (statusEl) statusEl.textContent = text;
+}
+
+// Загрузка библиотек Google API
+function gapiLoaded() { gapi.load('client', initializeGapiClient); }
+async function initializeGapiClient() {
+  await gapi.client.init({ apiKey: API_KEY, discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
+  gapiInited = true; checkAuthPreReqs();
+}
+function gisLoaded() {
+  tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '', });
+  gisInited = true; checkAuthPreReqs();
+}
+function checkAuthPreReqs() {
+  if (gapiInited && gisInited) updateSyncStatus('Облако готово к авторизации');
+}
+
+// Запуск облачной синхронизации
+function startCloudSync() {
+  const token = localStorage.getItem('gdrive_token');
+  if (token) {
+    gapi.client.setToken({ access_token: token });
+    loadDataFromDrive();
+  } else {
+    requestGoogleAuth();
+  }
+}
+
+function requestGoogleAuth() {
+  tokenClient.callback = async (resp) => {
+    if (resp.error) return updateSyncStatus('Ошибка авторизации в Google');
+    localStorage.setItem('gdrive_token', resp.access_token);
+    updateSyncStatus('Синхронизация запущена...');
+    loadDataFromDrive();
+  };
+  tokenClient.requestAccessToken({ prompt: 'consent' });
+}
+
+// Поиск и загрузка файла из скрытой папки appDataFolder
+async function loadDataFromDrive() {
+  try {
+    const response = await gapi.client.drive.files.list({ spaces: 'appDataFolder', fields: 'files(id, name)', pageSize: 1 });
+    const files = response.result.files;
+    if (files && files.length > 0) {
+      googleDriveFileId = files[0].id;
+      const fileContent = await gapi.client.drive.files.get({ fileId: googleDriveFileId, alt: 'media' });
+      if (fileContent.body) {
+        data = JSON.parse(fileContent.body);
+        localStorage.setItem('safe8', JSON.stringify(data));
+        renderTree();
+        if(current) openFolder(current);
+      }
+      updateSyncStatus('Синхронизация завершена успешно');
+    } else {
+      updateSyncStatus('Файл в облаке не найден. Создаём новый...');
+      await uploadDataToDrive(true);
+    }
+  } catch (err) {
+    if (err.status === 401) { requestGoogleAuth(); } 
+    else { updateSyncStatus('Ошибка работы с облаком'); }
+  }
+}
+
+// Выгрузка изменений в скрытую папку Google Drive
+async function uploadDataToDrive(isNew = false) {
+  const boundary = 'foo_bar_baz';
+  const delimiter = "\r\n--" + boundary + "\r\n";
+  const close_delim = "\r\n--" + boundary + "--";
+  const metadata = { name: 'safe_vault_data.json', parents: isNew ? ['appDataFolder'] : undefined };
+  const multipartRequestBody = delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) + delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(data) + close_delim;
+
+  try {
+    if (isNew || !googleDriveFileId) {
+      const resp = await gapi.client.request({ path: '/upload/drive/v3/files', method: 'POST', params: { uploadType: 'multipart' }, headers: { 'Content-Type': 'multipart/related; boundary="' + boundary + '"' }, body: multipartRequestBody });
+      googleDriveFileId = resp.result.id;
+    } else {
+      await gapi.client.request({ path: '/upload/drive/v3/files/' + googleDriveFileId, method: 'PATCH', params: { uploadType: 'multipart' }, headers: { 'Content-Type': 'multipart/related; boundary="' + boundary + '"' }, body: multipartRequestBody });
+    }
+    updateSyncStatus('Изменения сохранены в облаке');
+  } catch (err) {
+    updateSyncStatus('Ошибка отправки изменений');
+  }
+}
+
 function saveData(){
  localStorage.setItem('safe8',JSON.stringify(data));
  renderTree();
+ uploadDataToDrive(false);
 }
 
 function tick(){
@@ -638,7 +745,13 @@ function openDeleteModal(title,text,callback){
 }
 function closeDeleteModal(){ document.getElementById('customDeleteModal').style.display='none'; }
 
-(function(){ applyTheme(); renderTree(); })();
+// Инициализируем библиотеки Google при загрузке страницы окна
+window.onload = () => {
+  applyTheme(); 
+  renderTree();
+  gapiLoaded();
+  gisLoaded();
+};
 </script>
 </body>
 </html>
